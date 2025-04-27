@@ -55,19 +55,44 @@ const SleepTracker = () => {
       const sunday = getSundayOfWeek(startDateObj);
       setStartDate(formatDateForInput(sunday));
     } else {
-      // For 2-week and month views, ALWAYS end with today's date
+      // For 2-week and month views, use the passed-in start date
+      const startDateObj = new Date(start + 'T12:00:00');
       const today = new Date();
       today.setHours(12, 0, 0, 0);
       
       // Determine number of days to show based on viewMode
       const daysToShow = viewMode === '2week' ? 14 : 30;
       
-      // Calculate the start date by going back (daysToShow - 1) days from today
-      for (let i = daysToShow - 1; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
+      // Generate dates starting from the provided start date
+      for (let i = 0; i < daysToShow; i++) {
+        const date = new Date(startDateObj);
+        date.setDate(startDateObj.getDate() + i);
         date.setHours(12, 0, 0, 0);
+        
+        // Don't include dates after today
+        if (date > today) break;
+        
         newDates.push(formatDateForInput(date));
+      }
+      
+      // If we have fewer dates than expected (because we hit today's date),
+      // adjust the start date to show a full range ending at today
+      if (newDates.length < daysToShow) {
+        const adjustedStart = new Date(today);
+        adjustedStart.setDate(today.getDate() - (daysToShow - 1));
+        adjustedStart.setHours(12, 0, 0, 0);
+        
+        // Regenerate the dates
+        newDates = [];
+        for (let i = 0; i < daysToShow; i++) {
+          const date = new Date(adjustedStart);
+          date.setDate(adjustedStart.getDate() + i);
+          date.setHours(12, 0, 0, 0);
+          newDates.push(formatDateForInput(date));
+        }
+        
+        // Update the start date to match the adjusted start
+        setStartDate(formatDateForInput(adjustedStart));
       }
     }
     
