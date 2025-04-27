@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-800 font-sans;
+  }
+}
+
+/* Conditional formatting colors */
+:root {
+  --color-success-bg: #dcfce7;
+  --color-warning-bg: #fef9c3;
+  --color-error-bg: #fee2e2;
+}
+
+.format-success {
+  background-color: var(--color-success-bg) !important;
+}
+
+.format-warning {
+  background-color: var(--color-warning-bg) !important;
+}
+
+.format-error {
+  background-color: var(--color-error-bg) !important;
+}
+
+/* Smooth transitions */
+.transition-colors {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Custom focus styles */
+*:focus {
+  @apply outline-none ring-2 ring-indigo-200 ring-opacity-50;
+}
+
+/* Table styles */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid #e5e7eb;
+}
+
+th:first-child,
+td:first-child {
+  border-left: 1px solid #e5e7eb;
+}
+
+th:last-child,
+td:last-child {
+  border-right: 1px solid #e5e7eb;
+}
+
+tr:first-child th {
+  border-top: 1px solid #e5e7eb;
+}
+
+tr:first-child th:first-child {
+  border-top-left-radius: 0.5rem;
+}
+
+tr:first-child th:last-child {
+  border-top-right-radius: 0.5rem;
+}
+
+tr:last-child td:first-child {
+  border-bottom-left-radius: 0.5rem;
+}
+
+tr:last-child td:last-child {
+  border-bottom-right-radius: 0.5rem;
+}
