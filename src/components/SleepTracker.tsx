@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import TrackerHeader from './TrackerHeader';
 import DateNavigation from './DateNavigation';
 import MetricsTable from './MetricsTable';
+import DailyScores from './DailyScores';
 import Instructions from './Instructions';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { formatDateForInput, getSundayOfWeek, getWeekDates } from '../utils/dateUtils';
-import { Metric } from '../types';
+import { Metric, SleepData } from '../types';
 
 const SleepTracker = () => {
   // View mode state (week, 2-week, month)
@@ -30,7 +31,7 @@ const SleepTracker = () => {
   ]);
   
   // Data structure to store all sleep metrics (loaded from local storage if available)
-  const [sleepData, setSleepData] = useLocalStorage('sleepData', {
+  const [sleepData, setSleepData] = useLocalStorage<SleepData>('sleepData', {
     target: {
       bedtime_target: '22:00',
       bedtime_limit: '22:30',
@@ -40,6 +41,50 @@ const SleepTracker = () => {
       totalSleep_limit: '7:00'
     }
   });
+  
+  // Store cell colors (manually selected by user)
+  const [cellColors, setCellColors] = useLocalStorage<Record<string, Record<string, string>>>('cellColors', {});
+  
+  // Calculate daily scores based on manually selected cell colors
+  const dailyScores = useMemo(() => {
+    const scores: Record<string, number | null> = {};
+    
+    dates.forEach(date => {
+      // Skip if no data for this date
+      if (!cellColors[date]) {
+        scores[date] = null;
+        return;
+      }
+      
+      let redCells = 0;
+      let yellowCells = 0;
+      let greenCells = 0;
+      let totalCells = 0;
+      
+      // Count cells of each color for this date
+      for (const metricId in cellColors[date]) {
+        const color = cellColors[date][metricId];
+        totalCells++;
+        
+        if (color === 'format-error') {
+          redCells++;
+        } else if (color === 'format-warning') {
+          yellowCells++;
+        } else if (color === 'format-success') {
+          greenCells++;
+        }
+      }
+      
+      // Calculate score: 1 - (red + yellow/2) / total
+      if (totalCells > 0) {
+        scores[date] = 1 - (redCells + yellowCells / 2) / totalCells;
+      } else {
+        scores[date] = null;
+      }
+    });
+    
+    return scores;
+  }, [dates, cellColors]);
   
   // Update date range based on start date and view mode
   const updateDateRange = (start: string) => {
@@ -99,6 +144,18 @@ const SleepTracker = () => {
     setDates(newDates);
   };
   
+  // Handle color change for a cell
+  const handleCellColorChange = (metricId: string, date: string, color: string) => {
+    setCellColors(prev => {
+      const newColors = { ...prev };
+      if (!newColors[date]) {
+        newColors[date] = {};
+      }
+      newColors[date][metricId] = color;
+      return newColors;
+    });
+  };
+  
   // Initialize dates array on component mount and when viewMode changes
   useEffect(() => {
     const today = new Date();
@@ -141,14 +198,11 @@ const SleepTracker = () => {
   
   // Handle input change from contentEditable divs
   const handleInputChange = (metricId: string, date: string, value: string) => {
-    setSleepData((prevData: any) => {
+    setSleepData((prevData: SleepData) => {
       // Deep clone the previous data
-      const newData = JSON.parse(JSON.stringify(prevData));
+      const newData = JSON.parse(JSON.stringify(prevData)) as SleepData;
       
       if (date === 'target') {
-        if (!newData.target) {
-          newData.target = {};
-        }
         newData.target[metricId] = value;
       } else {
         // Initialize the date object if it doesn't exist
@@ -178,6 +232,8 @@ const SleepTracker = () => {
         sleepData={sleepData}
       />
       
+      <DailyScores dates={dates} scores={dailyScores} />
+      
       <MetricsTable 
         dates={dates}
         metrics={metrics}
@@ -185,6 +241,8 @@ const SleepTracker = () => {
         updateMetricName={updateMetricName}
         handleInputChange={handleInputChange}
         deleteMetric={deleteMetric}
+        cellColors={cellColors}
+        handleCellColorChange={handleCellColorChange}
       />
       
       <Instructions />

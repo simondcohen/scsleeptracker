@@ -8,9 +8,11 @@ interface MetricRowProps {
   index: number;
   dates: string[];
   getValue: (metricId: string, date: string) => string;
+  getColor: (metricId: string, date: string) => string;
   updateMetricName: (index: number, newName: string) => void;
   handleInputChange: (metricId: string, date: string, value: string) => void;
   onDelete: (index: number) => void;
+  onColorChange: (metricId: string, date: string, color: string) => void;
 }
 
 const MetricRow: React.FC<MetricRowProps> = ({
@@ -18,27 +20,23 @@ const MetricRow: React.FC<MetricRowProps> = ({
   index,
   dates,
   getValue,
+  getColor,
   updateMetricName,
   handleInputChange,
   onDelete,
+  onColorChange,
 }) => {
   const target = getValue(`${metric.id}_target`, 'target') || '';
   const limit = getValue(`${metric.id}_limit`, 'target') || '';
-
-  // State to track cell colors
-  const [cellColors, setCellColors] = useState<Record<string, string>>({});
   const [showDelete, setShowDelete] = useState(false);
 
   // Function to cycle through colors
-  const cycleColor = (date: string) => {
+  const cycleColor = (metricId: string, date: string) => {
     const colors = ['', 'format-success', 'format-warning', 'format-error'];
-    const currentColor = cellColors[date] || '';
+    const currentColor = getColor(metricId, date) || '';
     const currentIndex = colors.indexOf(currentColor);
     const nextIndex = (currentIndex + 1) % colors.length;
-    setCellColors(prev => ({
-      ...prev,
-      [date]: colors[nextIndex]
-    }));
+    onColorChange(metricId, date, colors[nextIndex]);
   };
 
   // Handle key press for saving on Enter
@@ -132,12 +130,13 @@ const MetricRow: React.FC<MetricRowProps> = ({
       </td>
       {dates.map((date) => {
         const value = getValue(metric.id, date);
+        const cellColor = getColor(metric.id, date);
         
         return (
           <td
             key={date}
-            onClick={() => cycleColor(date)}
-            className={`border-b border-r border-gray-200 text-center cursor-pointer ${cellColors[date]} ${
+            onClick={() => cycleColor(metric.id, date)}
+            className={`border-b border-r border-gray-200 text-center cursor-pointer ${cellColor} ${
               isCurrentDay(date) ? 'bg-indigo-50' : ''
             }`}
           >

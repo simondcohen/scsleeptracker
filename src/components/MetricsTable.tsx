@@ -1,15 +1,17 @@
 import React from 'react';
 import MetricRow from './MetricRow';
 import { formatDateForDisplay, isCurrentDay } from '../utils/dateUtils';
-import { Metric } from '../types';
+import { Metric, SleepData } from '../types';
 
 interface MetricsTableProps {
   dates: string[];
   metrics: Metric[];
-  sleepData: any;
+  sleepData: SleepData;
   updateMetricName: (index: number, newName: string) => void;
   handleInputChange: (metricId: string, date: string, value: string) => void;
   deleteMetric: (index: number) => void;
+  cellColors: Record<string, Record<string, string>>;
+  handleCellColorChange: (metricId: string, date: string, color: string) => void;
 }
 
 const MetricsTable: React.FC<MetricsTableProps> = ({
@@ -19,6 +21,8 @@ const MetricsTable: React.FC<MetricsTableProps> = ({
   updateMetricName,
   handleInputChange,
   deleteMetric,
+  cellColors,
+  handleCellColorChange,
 }) => {
   // Get value for a specific metric and date
   const getValue = (metricId: string, date: string) => {
@@ -27,6 +31,14 @@ const MetricsTable: React.FC<MetricsTableProps> = ({
     }
     if (sleepData[date] && sleepData[date][metricId] !== undefined) {
       return sleepData[date][metricId];
+    }
+    return '';
+  };
+
+  // Get color for a specific metric and date
+  const getColor = (metricId: string, date: string) => {
+    if (cellColors[date] && cellColors[date][metricId]) {
+      return cellColors[date][metricId];
     }
     return '';
   };
@@ -66,9 +78,11 @@ const MetricsTable: React.FC<MetricsTableProps> = ({
                 index={index}
                 dates={dates}
                 getValue={getValue}
+                getColor={getColor}
                 updateMetricName={updateMetricName}
                 handleInputChange={handleInputChange}
                 onDelete={deleteMetric}
+                onColorChange={handleCellColorChange}
               />
             ))}
           </tbody>

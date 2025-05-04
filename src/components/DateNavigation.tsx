@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft, ArrowRight, Download } from 'lucide-react';
 import { exportCSV } from '../utils/exportUtils';
 import { formatDateForInput } from '../utils/dateUtils';
+import { SleepData } from '../types';
 
 interface DateNavigationProps {
   viewMode: string;
@@ -11,7 +12,7 @@ interface DateNavigationProps {
   setStartDate: (date: string) => void;
   updateDateRange: (date: string) => void;
   addNewMetric: () => void;
-  sleepData: any;
+  sleepData: SleepData;
 }
 
 const DateNavigation: React.FC<DateNavigationProps> = ({

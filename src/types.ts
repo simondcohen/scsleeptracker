@@ -8,5 +8,21 @@ export interface MetricConfig {
 export interface Metric {
   id: string;
   name: string;
-  config: MetricConfig;
+  config?: {
+    type: 'time' | 'score' | 'number';
+    higherIsBetter: boolean;
+  };
+}
+
+export interface SleepDataEntry {
+  [metricId: string]: string;
+}
+
+export interface SleepDataTarget {
+  [targetId: string]: string;
+}
+
+export interface SleepData {
+  target: SleepDataTarget;
+  [date: string]: SleepDataEntry;
 }
