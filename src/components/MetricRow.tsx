@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { isCurrentDay } from '../utils/dateUtils';
 import { Metric } from '../types';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface MetricRowProps {
   metric: Metric;
@@ -13,6 +13,10 @@ interface MetricRowProps {
   handleInputChange: (metricId: string, date: string, value: string) => void;
   onDelete: (index: number) => void;
   onColorChange: (metricId: string, date: string, color: string) => void;
+  moveRowUp: (index: number) => void;
+  moveRowDown: (index: number) => void;
+  isFirstRow: boolean;
+  isLastRow: boolean;
 }
 
 const MetricRow: React.FC<MetricRowProps> = ({
@@ -25,6 +29,10 @@ const MetricRow: React.FC<MetricRowProps> = ({
   handleInputChange,
   onDelete,
   onColorChange,
+  moveRowUp,
+  moveRowDown,
+  isFirstRow,
+  isLastRow,
 }) => {
   const target = getValue(`${metric.id}_target`, 'target') || '';
   const limit = getValue(`${metric.id}_limit`, 'target') || '';
@@ -55,12 +63,30 @@ const MetricRow: React.FC<MetricRowProps> = ({
 
   return (
     <tr 
-      className={index % 2 === 0 ? 'bg-gray-50' : ''}
+      className={`${index % 2 === 0 ? 'bg-gray-50' : ''}`}
       onMouseEnter={() => setShowDelete(true)}
       onMouseLeave={() => setShowDelete(false)}
     >
       <td className="py-3 px-6 sticky left-0 z-10 border-b border-r-2 border-gray-200 font-medium text-gray-600 bg-white">
         <div className="flex items-center gap-2">
+          <div className="flex flex-col">
+            <button 
+              onClick={() => moveRowUp(index)}
+              disabled={isFirstRow}
+              className={`p-1 text-gray-400 hover:text-gray-600 ${isFirstRow ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
+              title="Move up"
+            >
+              <ChevronUp className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={() => moveRowDown(index)}
+              disabled={isLastRow}
+              className={`p-1 text-gray-400 hover:text-gray-600 ${isLastRow ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
+              title="Move down"
+            >
+              <ChevronDown className="w-4 h-4" />
+            </button>
+          </div>
           <div
             contentEditable={false}
             suppressContentEditableWarning={true}

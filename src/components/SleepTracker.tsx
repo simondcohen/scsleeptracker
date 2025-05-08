@@ -198,52 +198,87 @@ const SleepTracker = () => {
   
   // Handle input change from contentEditable divs
   const handleInputChange = (metricId: string, date: string, value: string) => {
-    setSleepData((prevData: SleepData) => {
-      // Deep clone the previous data
-      const newData = JSON.parse(JSON.stringify(prevData)) as SleepData;
-      
-      if (date === 'target') {
-        newData.target[metricId] = value;
-      } else {
-        // Initialize the date object if it doesn't exist
-        if (!newData[date]) {
-          newData[date] = {};
+    // If updating a target value
+    if (date === 'target') {
+      setSleepData(prev => ({
+        ...prev,
+        target: {
+          ...prev.target,
+          [metricId]: value
         }
-        // Set the new value
-        newData[date][metricId] = value;
+      }));
+      return;
+    }
+    
+    // Create the date entry if it doesn't exist
+    setSleepData(prev => {
+      const newData = { ...prev };
+      if (!newData[date]) {
+        newData[date] = {};
       }
+      
+      newData[date] = {
+        ...newData[date],
+        [metricId]: value
+      };
       
       return newData;
     });
   };
   
+  // Reorder metrics when dragged
+  const handleReorderMetrics = (newMetrics: Metric[]) => {
+    setMetrics(newMetrics);
+  };
+  
   return (
-    <div className="p-6 max-w-[1600px] mx-auto">
+    <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col max-w-screen-xl">
       <TrackerHeader />
       
-      <DateNavigation 
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        dates={dates}
-        startDate={startDate}
-        setStartDate={setStartDate}
-        updateDateRange={updateDateRange}
-        addNewMetric={addNewMetric}
-        sleepData={sleepData}
-      />
+      <div className="mb-8">
+        <DateNavigation 
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          dates={dates}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          updateDateRange={updateDateRange}
+          addNewMetric={addNewMetric}
+          sleepData={sleepData}
+        />
+      </div>
       
-      <DailyScores dates={dates} scores={dailyScores} />
+      <DailyScores scores={dailyScores} dates={dates} />
       
-      <MetricsTable 
-        dates={dates}
-        metrics={metrics}
-        sleepData={sleepData}
-        updateMetricName={updateMetricName}
-        handleInputChange={handleInputChange}
-        deleteMetric={deleteMetric}
-        cellColors={cellColors}
-        handleCellColorChange={handleCellColorChange}
-      />
+      <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-gray-800">Sleep Metrics</h2>
+          <button 
+            onClick={addNewMetric} 
+            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors duration-200"
+          >
+            Add Metric
+          </button>
+        </div>
+        
+        <MetricsTable 
+          dates={dates}
+          metrics={metrics}
+          sleepData={sleepData}
+          updateMetricName={updateMetricName}
+          handleInputChange={handleInputChange}
+          deleteMetric={deleteMetric}
+          cellColors={cellColors}
+          handleCellColorChange={handleCellColorChange}
+          reorderMetrics={handleReorderMetrics}
+        />
+        
+        <div className="text-sm text-gray-500">
+          <p>* Double-click on any cell to edit its value.</p>
+          <p>* Click once on a cell to change its color (useful for tracking good/neutral/bad values).</p>
+          <p>* Use the up/down arrow buttons to reorder metrics.</p>
+        </div>
+      </div>
       
       <Instructions />
     </div>

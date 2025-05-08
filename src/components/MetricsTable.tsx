@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import MetricRow from './MetricRow';
 import { formatDateForDisplay, isCurrentDay } from '../utils/dateUtils';
 import { Metric, SleepData } from '../types';
@@ -12,6 +12,7 @@ interface MetricsTableProps {
   deleteMetric: (index: number) => void;
   cellColors: Record<string, Record<string, string>>;
   handleCellColorChange: (metricId: string, date: string, color: string) => void;
+  reorderMetrics: (metrics: Metric[]) => void;
 }
 
 const MetricsTable: React.FC<MetricsTableProps> = ({
@@ -23,6 +24,7 @@ const MetricsTable: React.FC<MetricsTableProps> = ({
   deleteMetric,
   cellColors,
   handleCellColorChange,
+  reorderMetrics,
 }) => {
   // Get value for a specific metric and date
   const getValue = (metricId: string, date: string) => {
@@ -42,6 +44,34 @@ const MetricsTable: React.FC<MetricsTableProps> = ({
     }
     return '';
   };
+
+  // Move row up
+  const moveRowUp = useCallback(
+    (index: number) => {
+      if (index > 0) {
+        const newMetrics = [...metrics];
+        const temp = newMetrics[index];
+        newMetrics[index] = newMetrics[index - 1];
+        newMetrics[index - 1] = temp;
+        reorderMetrics(newMetrics);
+      }
+    },
+    [metrics, reorderMetrics]
+  );
+
+  // Move row down
+  const moveRowDown = useCallback(
+    (index: number) => {
+      if (index < metrics.length - 1) {
+        const newMetrics = [...metrics];
+        const temp = newMetrics[index];
+        newMetrics[index] = newMetrics[index + 1];
+        newMetrics[index + 1] = temp;
+        reorderMetrics(newMetrics);
+      }
+    },
+    [metrics, reorderMetrics]
+  );
 
   return (
     <div className="overflow-x-auto pb-4 mb-8">
@@ -73,7 +103,7 @@ const MetricsTable: React.FC<MetricsTableProps> = ({
           <tbody>
             {metrics.map((metric, index) => (
               <MetricRow
-                key={metric.id}
+                key={`${metric.id}-${index}`}
                 metric={metric}
                 index={index}
                 dates={dates}
@@ -83,6 +113,10 @@ const MetricsTable: React.FC<MetricsTableProps> = ({
                 handleInputChange={handleInputChange}
                 onDelete={deleteMetric}
                 onColorChange={handleCellColorChange}
+                moveRowUp={moveRowUp}
+                moveRowDown={moveRowDown}
+                isFirstRow={index === 0}
+                isLastRow={index === metrics.length - 1}
               />
             ))}
           </tbody>
