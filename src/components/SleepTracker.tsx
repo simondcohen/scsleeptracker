@@ -175,7 +175,8 @@ const SleepTracker = () => {
   
   // Add a new metric
   const addNewMetric = () => {
-    const newId = `metric_${metrics.length + 1}`;
+    const timestamp = Date.now();
+    const newId = `metric_${metrics.length + 1}_${timestamp}`;
     setMetrics([...metrics, { 
       id: newId, 
       name: 'New Metric',
@@ -217,6 +218,7 @@ const SleepTracker = () => {
         newData[date] = {};
       }
       
+      // Update only the specific metric for this date
       newData[date] = {
         ...newData[date],
         [metricId]: value

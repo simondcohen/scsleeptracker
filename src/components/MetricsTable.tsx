@@ -103,7 +103,7 @@ const MetricsTable: React.FC<MetricsTableProps> = ({
           <tbody>
             {metrics.map((metric, index) => (
               <MetricRow
-                key={`${metric.id}-${index}`}
+                key={metric.id}
                 metric={metric}
                 index={index}
                 dates={dates}
