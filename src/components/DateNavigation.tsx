@@ -32,91 +32,42 @@ const DateNavigation: React.FC<DateNavigationProps> = ({
     updateDateRange(newStartDate);
   };
   
+  // Number of days to shift based on the current view
+  const periodLength = () => {
+    if (viewMode === 'week') return 7;
+    if (viewMode === '2week') return 14;
+    return 30; // month
+  };
+
   // Handle previous period
   const handlePrevPeriod = () => {
-    if (viewMode === 'week') {
-      // For week view, go back 7 days
-      const prevStart = new Date(startDate);
-      prevStart.setDate(prevStart.getDate() - 7);
-      const newStartDate = formatDateForInput(prevStart);
-      setStartDate(newStartDate);
-      updateDateRange(newStartDate);
-    } else {
-      // For 2-week and month views, move back by the appropriate number of days
-      const daysToMove = viewMode === '2week' ? 7 : 15;
-      
-      // Get the first day currently shown
-      const firstShownDate = new Date(dates[0]);
-      
-      // Calculate new start date by moving back from the first shown date
-      const newStart = new Date(firstShownDate);
-      newStart.setDate(newStart.getDate() - daysToMove);
-      const newStartDate = formatDateForInput(newStart);
-      
-      setStartDate(newStartDate);
-      updateDateRange(newStartDate);
-    }
+    const days = periodLength();
+    const prevStart = new Date(startDate);
+    prevStart.setDate(prevStart.getDate() - days);
+    const newStartDate = formatDateForInput(prevStart);
+    setStartDate(newStartDate);
+    updateDateRange(newStartDate);
   };
   
   // Handle next period
   const handleNextPeriod = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    console.log('Current startDate:', startDate);
-    
-    if (viewMode === 'week') {
-      // For week view, go forward 7 days if not going past today
-      // Create date with noon to avoid timezone issues
-      const nextStart = new Date(startDate + 'T12:00:00');
-      nextStart.setDate(nextStart.getDate() + 7);
-      nextStart.setHours(0, 0, 0, 0); // Reset hours for comparison
-      
-      console.log('Week view - Next dates:', {
-        today: today.toISOString().split('T')[0],
-        nextStart: nextStart.toISOString().split('T')[0],
-        comparison: nextStart.getTime() <= today.getTime()
-      });
-      
-      // Only move forward if next week's start date is not after today
-      if (nextStart.getTime() <= today.getTime()) {
-        const newStartDate = formatDateForInput(nextStart);
-        setStartDate(newStartDate);
-        updateDateRange(newStartDate);
-      }
-    } else {
-      // For 2-week and month views
-      const daysToMove = viewMode === '2week' ? 7 : 15;
-      
-      // Calculate the last day currently shown
-      const lastShownDate = new Date(dates[dates.length - 1]);
-      
-      // Only move forward if we're not already showing today
-      if (lastShownDate < today) {
-        // Get the first date currently shown
-        const firstShownDate = new Date(dates[0]);
-        
-        // Calculate new start date by moving forward from current first date
-        const newStart = new Date(firstShownDate);
-        newStart.setDate(newStart.getDate() + daysToMove);
-        
-        // Ensure we don't go past today for the end date
-        const potentialEndDate = new Date(newStart);
-        potentialEndDate.setDate(potentialEndDate.getDate() + (viewMode === '2week' ? 13 : 29));
-        
-        if (potentialEndDate > today) {
-          // Adjust start date to ensure end date is today
-          const adjustedStart = new Date(today);
-          adjustedStart.setDate(today.getDate() - (viewMode === '2week' ? 13 : 29));
-          setStartDate(formatDateForInput(adjustedStart));
-          updateDateRange(formatDateForInput(adjustedStart));
-        } else {
-          // Use calculated start date
-          setStartDate(formatDateForInput(newStart));
-          updateDateRange(formatDateForInput(newStart));
-        }
-      }
+
+    const days = periodLength();
+    const nextStart = new Date(startDate);
+    nextStart.setDate(nextStart.getDate() + days);
+
+    const nextEnd = new Date(nextStart);
+    nextEnd.setDate(nextEnd.getDate() + days - 1);
+
+    if (nextEnd > today) {
+      return; // Prevent navigating into the future
     }
+
+    const newStartDate = formatDateForInput(nextStart);
+    setStartDate(newStartDate);
+    updateDateRange(newStartDate);
   };
   
   // Get the Sunday of the current week for display
