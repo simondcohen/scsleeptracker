@@ -7,6 +7,7 @@ interface MetricsTableProps {
   dates: string[];
   metrics: Metric[];
   sleepData: SleepData;
+  dailyScores: Record<string, number | null>;
   updateMetricName: (index: number, newName: string) => void;
   handleInputChange: (metricId: string, date: string, value: string) => void;
   deleteMetric: (index: number) => void;
@@ -19,6 +20,7 @@ const MetricsTable: React.FC<MetricsTableProps> = ({
   dates,
   metrics,
   sleepData,
+  dailyScores,
   updateMetricName,
   handleInputChange,
   deleteMetric,
@@ -101,6 +103,36 @@ const MetricsTable: React.FC<MetricsTableProps> = ({
             </tr>
           </thead>
           <tbody>
+            <tr className="bg-gray-50">
+              <td className="py-3 px-6 sticky left-0 z-10 border-b border-r-2 border-gray-200 font-medium text-gray-600 bg-white">
+                Daily Scores
+              </td>
+              <td className="border-b border-r border-gray-200 text-center">-</td>
+              <td className="border-b border-r-2 border-gray-200 text-center">-</td>
+              {dates.map((date) => {
+                const score = dailyScores[date];
+                let bgColor = 'bg-gray-50';
+                if (score !== null) {
+                  if (score >= 0.8) {
+                    bgColor = 'bg-green-50';
+                  } else if (score >= 0.5) {
+                    bgColor = 'bg-yellow-50';
+                  } else {
+                    bgColor = 'bg-red-50';
+                  }
+                }
+                return (
+                  <td
+                    key={date}
+                    className={`border-b border-r border-gray-200 text-center ${
+                      isCurrentDay(date) ? 'bg-indigo-50' : bgColor
+                    }`}
+                  >
+                    {score !== null ? `${Math.round(score * 100)}%` : '-'}
+                  </td>
+                );
+              })}
+            </tr>
             {metrics.map((metric, index) => (
               <MetricRow
                 key={metric.id}

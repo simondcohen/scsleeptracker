@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import TrackerHeader from './TrackerHeader';
 import DateNavigation from './DateNavigation';
 import MetricsTable from './MetricsTable';
-import DailyScores from './DailyScores';
 import Instructions from './Instructions';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { formatDateForInput, getSundayOfWeek, getWeekDates } from '../utils/dateUtils';
@@ -58,7 +57,6 @@ const SleepTracker = () => {
       
       let redCells = 0;
       let yellowCells = 0;
-      let greenCells = 0;
       let totalCells = 0;
       
       // Count cells of each color for this date
@@ -70,8 +68,6 @@ const SleepTracker = () => {
           redCells++;
         } else if (color === 'format-warning') {
           yellowCells++;
-        } else if (color === 'format-success') {
-          greenCells++;
         }
       }
       
@@ -250,7 +246,7 @@ const SleepTracker = () => {
         />
       </div>
       
-      <DailyScores scores={dailyScores} dates={dates} />
+
       
       <div className="bg-white rounded-lg shadow p-6 mb-8">
         <div className="flex justify-between items-center mb-6">
@@ -263,10 +259,11 @@ const SleepTracker = () => {
           </button>
         </div>
         
-        <MetricsTable 
+        <MetricsTable
           dates={dates}
           metrics={metrics}
           sleepData={sleepData}
+          dailyScores={dailyScores}
           updateMetricName={updateMetricName}
           handleInputChange={handleInputChange}
           deleteMetric={deleteMetric}
