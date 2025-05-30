@@ -62,8 +62,10 @@ const SleepTracker = () => {
       // Count cells of each color for this date
       for (const metricId in cellColors[date]) {
         const color = cellColors[date][metricId];
+        if (!color) continue; // ignore cells with no color assigned
+
         totalCells++;
-        
+
         if (color === 'format-error') {
           redCells++;
         } else if (color === 'format-warning') {
@@ -147,7 +149,18 @@ const SleepTracker = () => {
       if (!newColors[date]) {
         newColors[date] = {};
       }
-      newColors[date][metricId] = color;
+
+      if (color) {
+        newColors[date][metricId] = color;
+      } else {
+        if (newColors[date]) {
+          delete newColors[date][metricId];
+          if (Object.keys(newColors[date]).length === 0) {
+            delete newColors[date];
+          }
+        }
+      }
+
       return newColors;
     });
   };
