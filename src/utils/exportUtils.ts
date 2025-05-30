@@ -1,5 +1,7 @@
 // Export data as CSV
-export const exportCSV = (dates: string[], sleepData: any) => {
+import { SleepData } from '../types';
+
+export const exportCSV = (dates: string[], sleepData: SleepData) => {
   // Get all metric IDs from the data
   const metricIds = new Set<string>();
   const metricNames = new Map<string, string>();
