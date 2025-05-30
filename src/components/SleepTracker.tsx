@@ -17,29 +17,11 @@ const SleepTracker = () => {
   const [startDate, setStartDate] = useState('');
   
   // Sleep metrics to track (loaded from local storage if available)
-  const [metrics, setMetrics] = useLocalStorage<Metric[]>('sleepMetrics', [
-    { id: 'bedtime', name: 'Bedtime', config: { type: 'time', higherIsBetter: false } },
-    { id: 'waketime', name: 'Wake Time', config: { type: 'time', higherIsBetter: true } },
-    { id: 'totalSleep', name: 'Total Sleep', config: { type: 'time', higherIsBetter: true } },
-    { id: 'avgSleepApple', name: '7 Day Avg Sleep (apple)', config: { type: 'time', higherIsBetter: true } },
-    { id: 'ouraSleepScore', name: 'Oura Sleep Score', config: { type: 'score', higherIsBetter: true } },
-    { id: 'ouraReadiness', name: 'Oura Readiness Score', config: { type: 'score', higherIsBetter: true } },
-    { id: 'whoopRecovery', name: 'Whoop Recovery', config: { type: 'score', higherIsBetter: true } },
-    { id: 'ouraActivity', name: 'Oura Activity Score', config: { type: 'score', higherIsBetter: true } },
-    { id: 'naturalSleepRange', name: '"Natural Sleep Range"', config: { type: 'time', higherIsBetter: true } },
-    { id: 'sleepConsistency', name: 'Sleep Consistency (whoop)', config: { type: 'score', higherIsBetter: true } },
-  ]);
+  const [metrics, setMetrics] = useLocalStorage<Metric[]>('sleepMetrics', []);
   
   // Data structure to store all sleep metrics (loaded from local storage if available)
   const [sleepData, setSleepData] = useLocalStorage<SleepData>('sleepData', {
-    target: {
-      bedtime_target: '22:00',
-      bedtime_limit: '22:30',
-      waketime_target: '06:30',
-      waketime_limit: '07:00',
-      totalSleep_target: '8:00',
-      totalSleep_limit: '7:00'
-    }
+    target: {}
   });
   
   // Store cell colors (manually selected by user)
@@ -58,7 +40,6 @@ const SleepTracker = () => {
       
       let redCells = 0;
       let yellowCells = 0;
-      let greenCells = 0;
       let totalCells = 0;
       
       // Count cells of each color for this date
@@ -70,8 +51,6 @@ const SleepTracker = () => {
           redCells++;
         } else if (color === 'format-warning') {
           yellowCells++;
-        } else if (color === 'format-success') {
-          greenCells++;
         }
       }
       
@@ -263,17 +242,23 @@ const SleepTracker = () => {
           </button>
         </div>
         
-        <MetricsTable 
-          dates={dates}
-          metrics={metrics}
-          sleepData={sleepData}
-          updateMetricName={updateMetricName}
-          handleInputChange={handleInputChange}
-          deleteMetric={deleteMetric}
-          cellColors={cellColors}
-          handleCellColorChange={handleCellColorChange}
-          reorderMetrics={handleReorderMetrics}
-        />
+        {metrics.length === 0 ? (
+          <p className="text-gray-500 mb-4">
+            No metrics added yet. Click 'Add New Metric' to get started.
+          </p>
+        ) : (
+          <MetricsTable
+            dates={dates}
+            metrics={metrics}
+            sleepData={sleepData}
+            updateMetricName={updateMetricName}
+            handleInputChange={handleInputChange}
+            deleteMetric={deleteMetric}
+            cellColors={cellColors}
+            handleCellColorChange={handleCellColorChange}
+            reorderMetrics={handleReorderMetrics}
+          />
+        )}
         
         <div className="text-sm text-gray-500">
           <p>* Double-click on any cell to edit its value.</p>
