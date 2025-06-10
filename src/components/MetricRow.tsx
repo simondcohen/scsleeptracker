@@ -99,7 +99,7 @@ const MetricRow: React.FC<MetricRowProps> = ({
               e.currentTarget.contentEditable = 'true';
               e.currentTarget.focus();
             }}
-            className="outline-none px-2 py-1 rounded hover:bg-gray-100 w-fit"
+            className="outline-none px-2 py-1 rounded editable-cell w-fit"
           >
             {metric.name}
           </div>
@@ -129,7 +129,7 @@ const MetricRow: React.FC<MetricRowProps> = ({
             e.currentTarget.contentEditable = 'true';
             e.currentTarget.focus();
           }}
-          className="min-h-6 outline-none px-2 py-1 mx-auto w-20"
+          className="min-h-6 outline-none px-2 py-1 mx-auto w-20 editable-cell"
         >
           {target}
         </div>
@@ -149,7 +149,7 @@ const MetricRow: React.FC<MetricRowProps> = ({
             e.currentTarget.contentEditable = 'true';
             e.currentTarget.focus();
           }}
-          className="min-h-6 outline-none px-2 py-1 mx-auto w-20"
+          className="min-h-6 outline-none px-2 py-1 mx-auto w-20 editable-cell"
         >
           {limit}
         </div>
@@ -182,7 +182,7 @@ const MetricRow: React.FC<MetricRowProps> = ({
                 e.currentTarget.focus();
               }}
               onClick={(e) => e.stopPropagation()}
-              className="min-h-6 outline-none px-2 py-1 mx-auto w-20"
+              className="min-h-6 outline-none px-2 py-1 mx-auto w-20 editable-cell"
             >
               {value}
             </div>

@@ -28,8 +28,11 @@ const DateNavigation: React.FC<DateNavigationProps> = ({
   // Handle date range change
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStartDate = e.target.value;
-    setStartDate(newStartDate);
-    updateDateRange(newStartDate);
+    const today = formatDateForInput(new Date());
+    const validDate = newStartDate > today ? today : newStartDate;
+
+    setStartDate(validDate);
+    updateDateRange(validDate);
   };
   
   // Number of days to shift based on the current view

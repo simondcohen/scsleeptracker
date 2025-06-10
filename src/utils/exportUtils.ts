@@ -7,9 +7,11 @@ export const exportCSV = (dates: string[], sleepData: SleepData) => {
   const metricNames = new Map<string, string>();
   
   // Iterate through all dates to collect all used metrics
-  Object.keys(sleepData).forEach(date => {
-    Object.keys(sleepData[date]).forEach(metricId => {
-      metricIds.add(metricId);
+  Object.keys(sleepData)
+    .filter(date => date !== 'target') // skip target metadata
+    .forEach(date => {
+      Object.keys(sleepData[date]).forEach(metricId => {
+        metricIds.add(metricId);
       
       // Try to infer metric names from the data
       // This is a fallback in case we don't have the metrics list

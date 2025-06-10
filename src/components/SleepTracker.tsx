@@ -164,6 +164,45 @@ const SleepTracker = () => {
       return newColors;
     });
   };
+
+  // Determine suggested color based on metric config and targets
+  const getAutoColor = (metricId: string, value: string): string => {
+    const metric = metrics.find(m => m.id === metricId);
+    if (!metric || !metric.config || !value) return '';
+
+    const targetVal = sleepData.target[`${metricId}_target`];
+    const limitVal = sleepData.target[`${metricId}_limit`];
+    const { type, higherIsBetter } = metric.config;
+
+    const parseTime = (v: string) => {
+      const [h, m] = v.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    const compare = (val: number, target?: number, limit?: number) => {
+      if (target !== undefined && ((higherIsBetter && val >= target) || (!higherIsBetter && val <= target))) {
+        return 'format-success';
+      }
+      if (limit !== undefined && ((higherIsBetter && val < limit) || (!higherIsBetter && val > limit))) {
+        return 'format-error';
+      }
+      if (target !== undefined) return 'format-warning';
+      return '';
+    };
+
+    if (type === 'time') {
+      const val = parseTime(value);
+      const target = targetVal ? parseTime(targetVal) : undefined;
+      const limit = limitVal ? parseTime(limitVal) : undefined;
+      return compare(val, target, limit);
+    }
+
+    const num = parseFloat(value);
+    if (isNaN(num)) return '';
+    const target = targetVal ? parseFloat(targetVal) : undefined;
+    const limit = limitVal ? parseFloat(limitVal) : undefined;
+    return compare(num, target, limit);
+  };
   
   // Initialize dates array on component mount and when viewMode changes
   useEffect(() => {
@@ -219,22 +258,28 @@ const SleepTracker = () => {
       }));
       return;
     }
-    
+
     // Create the date entry if it doesn't exist
     setSleepData(prev => {
       const newData = { ...prev };
       if (!newData[date]) {
         newData[date] = {};
       }
-      
+
       // Update only the specific metric for this date
       newData[date] = {
         ...newData[date],
         [metricId]: value
       };
-      
+
       return newData;
     });
+
+    // Auto assign a color if user hasn't set one yet
+    if (!cellColors[date] || !cellColors[date][metricId]) {
+      const suggested = getAutoColor(metricId, value);
+      handleCellColorChange(metricId, date, suggested);
+    }
   };
   
   // Reorder metrics when dragged
